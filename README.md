@@ -4,6 +4,8 @@
 
 Built for the [Qloo Agentic Hackathon](https://qloo.devpost.com/) (*Agents, but with taste*).
 
+**Live demo:** [https://northbridge-taste.vercel.app](https://northbridge-taste.vercel.app) — currently in labeled **mock mode** until `QLOO_API_KEY` is set (`/api/health` reports `mode: "mock"`).
+
 > **Win rule:** if it would work the same without Qloo, you’re building the wrong thing.  
 > This app shows **Qloo-grounded** vs **LLM-only guess** side-by-side so the difference is obvious.
 
@@ -92,12 +94,14 @@ This MVP focuses on **place, movie, tv_show, artist, destination, brand**.
 
 ## Deploy (Vercel)
 
-1. Import `dl88jing/northbridge-taste` in Vercel  
-2. Set env `QLOO_API_KEY` (and optional `QLOO_BASE_URL`)  
+Production: [https://northbridge-taste.vercel.app](https://northbridge-taste.vercel.app) (project `dylan-team/northbridge-taste`).
+
+1. Import `dl88jing/northbridge-taste` in Vercel (or `vercel link --scope dylan-team`)  
+2. Set env `QLOO_BASE_URL=https://hackathon.api.qloo.com` (optional until key arrives; leave `QLOO_API_KEY` unset for mock mode)  
 3. Deploy — mock mode works even before the key lands  
 
 ```bash
-npx vercel --prod
+npx vercel --prod --scope dylan-team
 ```
 
 ## Mock mode
