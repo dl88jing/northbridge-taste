@@ -488,7 +488,9 @@ function ResultView({ result }: { result: PlanResult }) {
               <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Quiet brief</p>
               <h2 className="text-xl font-semibold text-stone-900">{result.brief.title}</h2>
               <p className="text-xs text-stone-500">
-                {result.city}
+                {result.kind === "weekend_trip" && !result.slots.some((x) => x.context.includes(result.city) && x.type === "place")
+                  ? `From ${result.city}`
+                  : result.city}
                 {result.cuisineTag ? ` · ${result.cuisineTag.name}` : ""}
               </p>
             </div>
@@ -776,6 +778,9 @@ function SlotRow({
             {slot.llm.resolved ? <Thumb e={slot.llm.resolved.entity} size="h-16 w-14" muted /> : null}
             <div className="min-w-0 flex-1">
               <p className="font-medium text-stone-700">{slot.llm.name}</p>
+              {slot.llm.resolved && slot.llm.resolved.entity.name.toLowerCase() !== slot.llm.name.toLowerCase() && (
+                <p className="text-[11px] text-stone-400">Qloo match: {slot.llm.resolved.entity.name}</p>
+              )}
               <p className="mt-0.5 text-xs text-stone-500">{slot.llm.why}</p>
               <div className="mt-2">
                 {slot.llm.resolved && Object.keys(slot.llm.resolved.fit).length > 0 ? (
