@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
-import { hasQlooKey, QLOO_BASE, qlooMode } from "@/lib/qloo";
+import { hasQlooKey, QLOO_BASE } from "@/lib/qloo";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   return NextResponse.json({
     ok: true,
-    mode: qlooMode(),
+    mode: hasQlooKey() ? "live" : "unconfigured",
     qlooKeyPresent: hasQlooKey(),
     qlooBase: QLOO_BASE,
-    note:
-      "Hackathon keys only work against https://hackathon.api.qloo.com — never staging/production.",
+    endpoints: ["GET /search", "GET /v2/insights", "GET /v2/tags"],
+    commit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? null,
   });
 }

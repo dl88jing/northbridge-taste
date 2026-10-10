@@ -3,13 +3,7 @@
 :root {
   --background: #fafaf9;
   --foreground: #1c1917;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0c0a09;
-    --foreground: #fafaf9;
-  }
+  color-scheme: light;
 }
 
 body {

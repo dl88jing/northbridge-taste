@@ -1,37 +1,48 @@
-import type { HouseholdMember } from "./types";
+import type { HouseholdMember, MemberId, Seeds } from "./types";
 
-/** Avery & Morgan — Northbridge household taste profile (public demo identity). */
+/** Avery & Morgan — the Northbridge household (public demo identity). */
 export const HOUSEHOLD: HouseholdMember[] = [
   {
     id: "avery",
     name: "Avery",
     notes:
-      "Prefers quiet evenings, indie film, Japanese / seasonal cooking, jazz and ambient playlists. Avoids loud crowds.",
+      "Quiet evenings, intimate indie film, seasonal Californian cooking, soft psych-soul and jazz. Avoids loud crowds.",
     seeds: {
-      movie: ["Past Lives", "Before Sunrise", "The Grand Budapest Hotel"],
-      artist: ["Khruangbin", "Norah Jones", "Miles Davis"],
+      movie: ["Past Lives", "Before Sunrise"],
+      artist: ["Khruangbin", "Norah Jones"],
       place: ["Chez Panisse", "Tartine Bakery"],
-      brand: ["Muji", "Patagonia"],
-      destination: ["Kyoto", "Lisbon"],
-      tv_show: ["The Bear", "Slow Horses"],
+      tv_show: ["The Bear"],
+      destination: ["Kyoto"],
+      brand: ["Muji"],
     },
   },
   {
     id: "morgan",
     name: "Morgan",
     notes:
-      "Curious traveler, sci-fi + prestige TV, bold flavors, live music when the vibe is right. Loves gift-giving with a story.",
+      "Cerebral sci-fi and prestige TV, bold flavors, art-rock and electronic. Curious traveler; loves gifts with a story.",
     seeds: {
-      movie: ["Dune", "Everything Everywhere All at Once", "Arrival"],
-      artist: ["Tame Impala", "Beyoncé", "Radiohead"],
-      place: ["Momofuku Noodle Bar", "Starbucks Reserve Roastery"],
-      brand: ["Aesop", "Leica"],
-      destination: ["Reykjavik", "Mexico City"],
-      tv_show: ["Severance", "The Expanse"],
+      movie: ["Dune", "Arrival"],
+      artist: ["Tame Impala", "Radiohead"],
+      place: ["Momofuku Noodle Bar", "La Taqueria"],
+      tv_show: ["Severance"],
+      destination: ["Reykjavik"],
+      brand: ["Leica"],
     },
   },
 ];
 
-export function householdBlurb(): string {
-  return HOUSEHOLD.map((m) => `${m.name}: ${m.notes}`).join(" ");
+export const HOME_CITY = "San Francisco";
+
+export function memberName(id: MemberId): "Avery" | "Morgan" {
+  return id === "avery" ? "Avery" : "Morgan";
+}
+
+export function seedsFor(
+  id: MemberId,
+  overrides?: Partial<Record<MemberId, Seeds>>,
+): Seeds {
+  const o = overrides?.[id];
+  if (o && Object.values(o).some((v) => v && v.length)) return o;
+  return HOUSEHOLD.find((m) => m.id === id)!.seeds;
 }

@@ -12,83 +12,155 @@ export type EntityType =
   | "tv_show"
   | "video_game";
 
-export type Domain =
-  | "dining"
-  | "film"
-  | "tv"
-  | "music"
-  | "travel"
-  | "gift";
+export type MemberId = "avery" | "morgan";
 
 export type PlanKind =
   | "friday_night_in"
+  | "movie_night"
+  | "date_night"
   | "weekend_trip"
   | "gift"
-  | "date_night"
   | "custom";
 
+export type Seeds = Partial<Record<EntityType, string[]>>;
+
 export interface HouseholdMember {
-  id: "avery" | "morgan";
+  id: MemberId;
   name: "Avery" | "Morgan";
-  /** Seed likes expressed as free-text names; resolved via Qloo /search */
-  seeds: Partial<Record<EntityType, string[]>>;
+  /** Seed likes expressed as free-text names; resolved live via Qloo /search */
+  seeds: Seeds;
   notes: string;
+}
+
+export interface QlooTag {
+  id: string;
+  name: string;
+  type?: string;
 }
 
 export interface QlooEntity {
   id: string;
   name: string;
   type: EntityType;
-  subtype?: string;
+  disambiguation?: string;
   popularity?: number;
-  properties?: Record<string, unknown>;
-  tags?: Array<{ name?: string; id?: string }>;
-  /** True when this came from mock fixtures, not live Qloo */
-  mock?: boolean;
+  /** query.affinity from /v2/insights (0–1) */
+  affinity?: number;
+  image?: string;
+  description?: string;
+  year?: number;
+  address?: string;
+  neighborhood?: string;
+  city?: string;
+  website?: string;
+  priceLevel?: number;
+  rating?: number;
+  lat?: number;
+  lon?: number;
+  googlePlaceId?: string;
+  imdbId?: string;
+  letterboxdId?: string;
+  genres?: string[];
+  tags: QlooTag[];
 }
 
-export interface IntentExtraction {
-  kind: PlanKind;
-  raw: string;
-  domains: Domain[];
-  /** Free-text seed phrases to resolve via /search */
-  seedQueries: Array<{ query: string; type: EntityType }>;
-  constraints: string[];
-  forWhom: Array<"avery" | "morgan" | "both">;
-  tone: "quiet" | "festive" | "adventurous" | "cozy";
+export interface DeepLink {
+  label: string;
+  href: string;
+  kind: "map" | "book" | "watch" | "listen" | "tickets" | "web" | "shop" | "info";
+}
+
+/** One candidate with per-member fit (affinity from a scoring /v2/insights call). */
+export interface ScoredCandidate {
+  entity: QlooEntity;
+  fit: Partial<Record<MemberId, number>>;
+  /** Which per-member / joint lists the candidate appeared in */
+  inLists: Array<MemberId | "joint">;
+  sharedTags: string[];
+  links: DeepLink[];
+}
+
+export interface SlotResult {
+  id: string;
+  label: string;
+  verb: string;
+  type: EntityType;
+  /** Human-readable query description, e.g. "Japanese restaurant · San Francisco" */
+  context: string;
+  pick: ScoredCandidate | null;
+  alternates: ScoredCandidate[];
+  conflict: null | {
+    severity: number;
+    overlap: number;
+    averyPick: ScoredCandidate;
+    morganPick: ScoredCandidate;
+    bridge: ScoredCandidate;
+    escalated: boolean;
+  };
+  llm: {
+    name: string;
+    why: string;
+    resolved: ScoredCandidate | null;
+  } | null;
+  chainedFrom?: string;
+  error?: string;
 }
 
 export interface AgentStep {
   id: string;
   label: string;
-  status: "pending" | "running" | "done" | "skipped" | "error";
-  detail?: string;
-  mock?: boolean;
+  status: "done" | "error" | "skipped";
+  detail: string;
+  calls: number;
+  ms: number;
 }
 
-export interface RecommendationCard {
-  domain: Domain;
-  entity: QlooEntity;
-  why: string;
-  source: "qloo" | "llm_guess" | "mock";
+export interface QlooCallLog {
+  endpoint: "/search" | "/v2/insights" | "/v2/tags";
+  purpose: string;
+  params: Record<string, string>;
+  status: number | "cache";
+  results: number;
+  ms: number;
 }
 
-export interface QuietBrief {
-  title: string;
-  summary: string;
-  itinerary: RecommendationCard[];
-  escalations: string[];
-  policyNotes: string[];
+export interface PlanRequest {
+  plan: string;
+  city?: string;
+  cuisine?: string;
+  household?: Partial<Record<MemberId, Seeds>>;
 }
 
 export interface PlanResult {
-  mode: "live" | "mock";
-  intent: IntentExtraction;
+  ok: true;
+  mode: "live";
+  plan: string;
+  kind: PlanKind;
+  kindLabel: string;
+  forWhom: MemberId[];
+  city: string;
+  cuisineTag?: QlooTag | null;
+  seeds: Record<MemberId, QlooEntity[]>;
+  unresolvedSeeds: string[];
+  slots: SlotResult[];
+  brief: {
+    title: string;
+    lines: string[];
+    policy: string[];
+    escalation: string | null;
+  };
+  contrast: {
+    qlooAvgFit: number | null;
+    llmAvgFit: number | null;
+    qlooGrounded: number;
+    llmGrounded: number;
+    llmTotal: number;
+    headline: string;
+  };
   steps: AgentStep[];
-  resolvedSeeds: QlooEntity[];
-  qlooBrief: QuietBrief;
-  llmOnlyBrief: QuietBrief;
-  comparisonNote: string;
+  calls: QlooCallLog[];
+  elapsedMs: number;
+  cached?: boolean;
 }
 
 export const ENTITY_URN: Record<EntityType, string> = {
@@ -103,7 +175,3 @@ export const ENTITY_URN: Record<EntityType, string> = {
   tv_show: "urn:entity:tv_show",
   video_game: "urn:entity:video_game",
 };
-
-export const URN_TO_TYPE: Record<string, EntityType> = Object.fromEntries(
-  Object.entries(ENTITY_URN).map(([k, v]) => [v, k as EntityType]),
-) as Record<string, EntityType>;
