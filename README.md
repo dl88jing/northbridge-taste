@@ -6,6 +6,8 @@ Avery & Morgan give it a vague plan — *"Friday night in"*, *"Date night out"*,
 Built for the [Qloo Agentic Hackathon](https://qloo.devpost.com/) (*Agents, but with taste*).
 
 **▶ Live demo: [northbridge-taste.vercel.app](https://northbridge-taste.vercel.app)**: live Qloo data, no login. Click any scenario card.
+**🎬 Demo video (2:32): [demo.mp4 on the GitHub release](https://github.com/dl88jing/northbridge-taste/releases/download/demo-video-v1/demo.mp4)** ([release page](https://github.com/dl88jing/northbridge-taste/releases/tag/demo-video-v1)): live app, live Qloo API.
+
 Health check: [`/api/health`](https://northbridge-taste.vercel.app/api/health) → `{"mode":"live", ...}`
 
 ---
